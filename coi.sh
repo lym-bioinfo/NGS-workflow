@@ -1,10 +1,12 @@
 input_dir="/home/kampo314/coi_project"
 trimmed_output_dir="/home/kampo314/coi_project/trimmed"
 mapped_output_dir="/home/kampo314/coi_project/mapped"
+sorted_output_dir="/home/kampo314/coi_project/sorted"
 log_file="/home/kampo314/coi_project/process_log.txt"
 
 mkdir -p "$trimmed_output_dir"
 mkdir -p "$mapped_output_dir"
+mkdir -p "$sorted_output_dir"
 
 : > "$log_file"
 
@@ -24,6 +26,13 @@ for file_1 in *_1.fastq; do
   
   dart -i /home/kampo314/RAP2024/XXX -f "$trimmed_file_1" -f2 "$trimmed_file_2" -bo "$mapped_output_dir/$mapped_prefix.bam" -t 18 -mis 1 &>> "$log_file"
   echo "Completed mapping for $trimmed_file_1 and $trimmed_file_2" >> "$log_file"
+
+  sorted_bam="${sorted_output_dir}/${mapped_prefix}_sorted.bam"
+  samtools sort -@ 10 -o "$sorted_bam" "$mapped_output_dir/$mapped_prefix.bam" &>> "$log_file"
+  echo "Completed sorting for $mapped_prefix.bam" >> "$log_file"
+
+  rm "$trimmed_file_1" "$trimmed_file_2" "$mapped_output_dir/$mapped_prefix.bam"
+  echo "Deleted intermediate files for $prefix" >> "$log_file"
 done
 
-echo "All trimming and mapping steps completed." >> "$log_file"
+echo "FINISHED" >> "$log_file"
